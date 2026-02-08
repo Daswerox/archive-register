@@ -5,14 +5,12 @@ const filterFloor = urlParams.get('floor');
 
 // ===== DOM =====
 const main = document.querySelector('main');
-main.innerHTML = '';
-
 const searchInput = document.getElementById('search');
 const searchBtn = document.getElementById('searchBtn');
 
 let data = null;
 
-// ===== Вспомогательная функция ? и * =====
+// ===== Функция для ? и * =====
 function wildcardToRegExp(str) {
   if (!str) return /.*/;
   let escaped = str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
@@ -45,8 +43,6 @@ function filterData(query, shelfId, floorId) {
 // ===== Отображение =====
 function displayArchive(shelves) {
   main.innerHTML = '';
-  main.appendChild(searchInput);
-  main.appendChild(searchBtn);
 
   if (!shelves || shelves.length === 0) {
     const msg = document.createElement('p');
@@ -76,7 +72,7 @@ function displayArchive(shelves) {
 
       const boxesContainer = document.createElement('div');
       boxesContainer.style.marginLeft = '15px';
-      boxesContainer.style.display = 'block'; // открыто
+      boxesContainer.style.display = 'block';
 
       floor.boxes.forEach(box => {
         const boxCard = document.createElement('div');
@@ -106,7 +102,7 @@ function displayArchive(shelves) {
 
       // Клик по этажу — сворачиваем/разворачиваем коробки
       floorHeader.addEventListener('click', () => {
-        boxesContainer.style.display = boxesContainer.style.display === 'none' ? 'block' : 'block'; // ВСЕГДА разворачиваем этаж полностью
+        boxesContainer.style.display = boxesContainer.style.display === 'none' ? 'block' : 'none';
       });
 
       floorCard.appendChild(boxesContainer);
@@ -115,7 +111,7 @@ function displayArchive(shelves) {
 
     // Клик по полке — сворачиваем/разворачиваем этажи
     shelfHeader.addEventListener('click', () => {
-      floorsContainer.style.display = floorsContainer.style.display === 'none' ? 'block' : 'block';
+      floorsContainer.style.display = floorsContainer.style.display === 'none' ? 'block' : 'none';
     });
 
     shelfCard.appendChild(floorsContainer);
