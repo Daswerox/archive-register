@@ -63,7 +63,6 @@ const caseList=document.getElementById('caseList');
 const newCaseInput=document.getElementById('newCaseInput');
 const addCaseBtn=document.getElementById('addCaseBtn');
 const copyJsonBtn=document.getElementById('copyJsonBtn');
-const jsonOutput=document.getElementById('jsonOutput');
 
 const editShelfBtn=document.getElementById('editShelfBtn');
 const deleteShelfBtn=document.getElementById('deleteShelfBtn');
@@ -75,7 +74,6 @@ const deleteBoxBtn=document.getElementById('deleteBoxBtn');
 const toggleTableBtn=document.getElementById('toggleTableBtn');
 const tableContainer=document.getElementById('tableContainer');
 
-// Загрузка archive.json
 fetch('data/archive.json').then(r=>r.ok?r.json():{shelves:[]}).then(data=>{
   archive=data;
   updateShelfSelect();
@@ -118,15 +116,16 @@ shelfSelect.addEventListener('change',()=>{
       updateShelfSelect();
       shelfSelect.value=name;
       updateFloorSelect();
+      updateBoxSelect();
     }
   } else updateFloorSelect();
 });
 
 floorSelect.addEventListener('change',()=>{
+  const shelf=archive.shelves.find(s=>s.name===shelfSelect.value);
   if(floorSelect.value==="__add__"){
-    const shelf=archive.shelves.find(s=>s.name===shelfSelect.value);
     const name=prompt("Название нового этажа:");
-    if(name){
+    if(name && shelf){
       const newFloor={id:shelf.floors.length+1,name:name,boxes:[]};
       shelf.floors.push(newFloor);
       updateFloorSelect();
@@ -137,9 +136,9 @@ floorSelect.addEventListener('change',()=>{
 });
 
 boxSelect.addEventListener('change',()=>{
-  if(boxSelect.value==="__add__"){
-    const shelf=archive.shelves.find(s=>s.name===shelfSelect.value);
-    const floor=shelf.floors.find(f=>f.name===floorSelect.value);
+  const shelf=archive.shelves.find(s=>s.name===shelfSelect.value);
+  const floor=shelf?.floors.find(f=>f.name===floorSelect.value);
+  if(boxSelect.value==="__add__" && floor){
     const name=prompt("Название новой коробки:");
     if(name){
       const newBox={id:floor.boxes.length+1,name:name,cases:[]};
@@ -178,7 +177,6 @@ addCaseBtn.addEventListener('click',()=>{
   box.cases.push(text); newCaseInput.value=''; renderCases();
 });
 
-// Редактирование/удаление уровней
 editShelfBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.name===shelfSelect.value); if(!s) return; const n=prompt("Редактировать полку",s.name); if(n){ s.name=n; updateShelfSelect(); }});
 deleteShelfBtn.addEventListener('click',()=>{ if(confirm("Удалить полку и всё внутри?")){ archive.shelves=archive.shelves.filter(s=>s.name!==shelfSelect.value); updateShelfSelect(); }});
 editFloorBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.name===shelfSelect.value); const f=s?.floors.find(f=>f.name===floorSelect.value); if(!f) return; const n=prompt("Редактировать этаж",f.name); if(n){ f.name=n; updateFloorSelect(); }});
@@ -186,7 +184,6 @@ deleteFloorBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.
 editBoxBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.name===shelfSelect.value); const f=s?.floors.find(f=>f.name===floorSelect.value); const b=f?.boxes.find(b=>b.name===boxSelect.value); if(!b) return; const n=prompt("Редактировать коробку",b.name); if(n){ b.name=n; updateBoxSelect(); }});
 deleteBoxBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.name===shelfSelect.value); const f=s?.floors.find(f=>f.name===floorSelect.value); const b=f?.boxes.find(b=>b.name===boxSelect.value); if(!b) return; if(confirm("Удалить коробку и всё внутри?")){ f.boxes=f.boxes.filter(bx=>bx.name!==boxSelect.value); updateBoxSelect(); }});
 
-// Кнопка показать/скрыть список
 toggleTableBtn.addEventListener('click',()=>{
   if(tableContainer.style.display==="block"){ tableContainer.style.display="none"; toggleTableBtn.textContent="Показать список"; }
   else{
@@ -206,9 +203,9 @@ toggleTableBtn.addEventListener('click',()=>{
   }
 });
 
-// Копирование JSON
 copyJsonBtn.addEventListener('click',()=>{
-  jsonOutput.value=JSON.stringify(archive,null,2);
+  const jsonStr=JSON.stringify(archive,null,2);
+  jsonOutput.value=jsonStr;
   jsonOutput.style.display='block';
   jsonOutput.select();
   document.execCommand('copy');
