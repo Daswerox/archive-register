@@ -1,8 +1,8 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background: #f5f6f8;
+  background: #f0f4f8;
   color: #1f2933;
-  font-size: 22px;
+  font-size: 24px;
   margin: 0;
   padding: 0;
 }
@@ -15,38 +15,65 @@ header {
 }
 
 header h1 {
-  font-size: 28px;
+  font-size: 32px;
   margin: 0;
 }
 
 #controls {
   padding: 20px;
   background: white;
-  border-radius: 14px;
+  border-radius: 16px;
   margin: 16px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
-#controls input, #controls select {
-  font-size: 22px;
-  padding: 10px;
-  margin: 4px 0;
+#controls input, #controls select, #controls button {
+  font-size: 24px;
+  padding: 12px;
+  margin: 6px 0;
   width: 100%;
   max-width: 500px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #cbd5e1;
+  box-sizing: border-box;
 }
 
 #controls button {
-  font-size: 22px;
-  padding: 12px 25px;
-  margin: 10px 5px 10px 0;
-  border-radius: 12px;
+  background-color: #2563eb;
+  color: white;
   border: none;
   cursor: pointer;
-  background: #2563eb;
-  color: white;
 }
+
+#caseList {
+  margin-top: 10px;
+}
+
+.case-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 22px;
+}
+
+.case-item input {
+  font-size: 22px;
+  flex: 1;
+  margin-right: 6px;
+  padding: 6px;
+  margin-bottom: 4px;
+}
+
+.case-item button {
+  font-size: 20px;
+  padding: 6px 12px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+}
+
+.case-item .edit-btn { background-color: #f59e0b; color: white; border: none; }
+.case-item .delete-btn { background-color: #ef4444; color: white; border: none; }
 
 table {
   width: 100%;
@@ -58,7 +85,7 @@ table th, table td {
   border: 1px solid #ccc;
   padding: 12px;
   text-align: left;
-  font-size: 20px;
+  font-size: 22px;
 }
 
 table th {
