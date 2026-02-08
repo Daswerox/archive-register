@@ -1,20 +1,18 @@
-// ===== Параметры URL =====
+// ===== URL фильтры =====
 const urlParams = new URLSearchParams(window.location.search);
 const filterShelf = urlParams.get('shelf');
 const filterFloor = urlParams.get('floor');
 
-// ===== Главный контейнер =====
+// ===== DOM =====
 const main = document.querySelector('main');
 main.innerHTML = '';
 
-// ===== Поиск =====
 const searchInput = document.getElementById('search');
 const searchBtn = document.getElementById('searchBtn');
 
-// ===== Данные архива =====
 let data = null;
 
-// ===== Функция фильтрации и поиска с ? и * =====
+// ===== Вспомогательная функция ? и * =====
 function wildcardToRegExp(str) {
   if (!str) return /.*/;
   let escaped = str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
@@ -23,10 +21,11 @@ function wildcardToRegExp(str) {
   return new RegExp(escaped, 'i');
 }
 
+// ===== Фильтрация =====
 function filterData(query, shelfId, floorId) {
   const regex = wildcardToRegExp(query);
 
-  const filteredShelves = data.shelves.map(shelf => {
+  return data.shelves.map(shelf => {
     if (shelfId && shelf.id != shelfId) return null;
     const floors = shelf.floors.map(floor => {
       if (floorId && floor.id != floorId) return null;
@@ -41,11 +40,9 @@ function filterData(query, shelfId, floorId) {
     if (floors.length === 0) return null;
     return { ...shelf, floors };
   }).filter(s => s !== null);
-
-  return filteredShelves;
 }
 
-// ===== Отображение архива =====
+// ===== Отображение =====
 function displayArchive(shelves) {
   main.innerHTML = '';
   main.appendChild(searchInput);
@@ -98,6 +95,7 @@ function displayArchive(shelves) {
           casesList.appendChild(li);
         });
 
+        // Клик по коробке — сворачиваем/разворачиваем дела
         boxHeader.addEventListener('click', () => {
           casesList.style.display = casesList.style.display === 'none' ? 'block' : 'none';
         });
@@ -106,16 +104,18 @@ function displayArchive(shelves) {
         boxesContainer.appendChild(boxCard);
       });
 
+      // Клик по этажу — сворачиваем/разворачиваем коробки
       floorHeader.addEventListener('click', () => {
-        boxesContainer.style.display = boxesContainer.style.display === 'none' ? 'block' : 'none';
+        boxesContainer.style.display = boxesContainer.style.display === 'none' ? 'block' : 'block'; // ВСЕГДА разворачиваем этаж полностью
       });
 
       floorCard.appendChild(boxesContainer);
       floorsContainer.appendChild(floorCard);
     });
 
+    // Клик по полке — сворачиваем/разворачиваем этажи
     shelfHeader.addEventListener('click', () => {
-      floorsContainer.style.display = floorsContainer.style.display === 'none' ? 'block' : 'none';
+      floorsContainer.style.display = floorsContainer.style.display === 'none' ? 'block' : 'block';
     });
 
     shelfCard.appendChild(floorsContainer);
@@ -123,13 +123,7 @@ function displayArchive(shelves) {
   });
 }
 
-// ===== Кнопки полок =====
-function filterByShelf(shelfId) {
-  const result = filterData(searchInput.value, shelfId, null);
-  displayArchive(result);
-}
-
-// ===== Поиск по кнопке =====
+// ===== Кнопка поиска =====
 searchBtn.addEventListener('click', () => {
   const result = filterData(searchInput.value, filterShelf, filterFloor);
   displayArchive(result);
