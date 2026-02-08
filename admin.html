@@ -65,6 +65,8 @@ const newCaseInput = document.getElementById('newCaseInput');
 const addCaseBtn = document.getElementById('addCaseBtn');
 const copyJsonBtn = document.getElementById('copyJsonBtn');
 const openJsonBtn = document.getElementById('openJsonBtn');
+const toggleTableBtn = document.getElementById('toggleTableBtn');
+const tableContainer = document.getElementById('tableContainer');
 
 const editShelfBtn = document.getElementById('editShelfBtn');
 const deleteShelfBtn = document.getElementById('deleteShelfBtn');
@@ -72,9 +74,6 @@ const editFloorBtn = document.getElementById('editFloorBtn');
 const deleteFloorBtn = document.getElementById('deleteFloorBtn');
 const editBoxBtn = document.getElementById('editBoxBtn');
 const deleteBoxBtn = document.getElementById('deleteBoxBtn');
-
-const toggleTableBtn = document.getElementById('toggleTableBtn');
-const tableContainer = document.getElementById('tableContainer');
 
 // --- загрузка JSON ---
 fetch('data/archive.json')
@@ -89,6 +88,7 @@ function updateShelfSelect() {
     const o = document.createElement('option'); o.value = s.name; o.textContent = s.name; shelfSelect.appendChild(o);
   });
   const addOpt = document.createElement('option'); addOpt.value = "__add__"; addOpt.textContent = "Добавить полку"; shelfSelect.appendChild(addOpt);
+  shelfSelect.value = shelfSelect.value || (archive.shelves[0]?.name ?? "__add__");
   updateFloorSelect();
 }
 
@@ -98,6 +98,7 @@ function updateFloorSelect() {
   if (!shelf) { caseList.innerHTML=''; return; }
   shelf.floors.forEach(f => { const o = document.createElement('option'); o.value = f.name; o.textContent = f.name; floorSelect.appendChild(o); });
   const addOpt = document.createElement('option'); addOpt.value = "__add__"; addOpt.textContent = "Добавить этаж"; floorSelect.appendChild(addOpt);
+  floorSelect.value = floorSelect.value || (shelf.floors[0]?.name ?? "__add__");
   updateBoxSelect();
 }
 
@@ -108,31 +109,51 @@ function updateBoxSelect() {
   if (!floor) { caseList.innerHTML=''; return; }
   floor.boxes.forEach(b => { const o = document.createElement('option'); o.value = b.name; o.textContent = b.name; boxSelect.appendChild(o); });
   const addOpt = document.createElement('option'); addOpt.value = "__add__"; addOpt.textContent = "Добавить коробку"; boxSelect.appendChild(addOpt);
+  boxSelect.value = boxSelect.value || (floor.boxes[0]?.name ?? "__add__");
   renderCases();
 }
 
-// --- выбор с проверкой даже одной опции ---
-function handleSelectAdd(selectEl, type) {
-  if(selectEl.value==="__add__") {
+// --- обработка добавления ---
+function handleAdd(selectEl, type) {
+  if(selectEl.value === "__add__") {
     const name = prompt(`Название новой ${type}:`);
     if(!name) return;
-    if(type==="полки") { archive.shelves.push({ id: archive.shelves.length+1, name:name, floors: [] }); updateShelfSelect(); shelfSelect.value=name; updateFloorSelect(); }
+
+    if(type==="полки") { 
+      archive.shelves.push({ id: archive.shelves.length+1, name:name, floors: [] });
+      updateShelfSelect(); 
+      shelfSelect.value=name; 
+      updateFloorSelect();
+    }
+
     if(type==="этажа") {
       const shelf = archive.shelves.find(s=>s.name===shelfSelect.value); if(!shelf) return;
-      shelf.floors.push({ id: shelf.floors.length+1, name:name, boxes: [] }); updateFloorSelect(); floorSelect.value=name; updateBoxSelect();
+      shelf.floors.push({ id: shelf.floors.length+1, name:name, boxes: [] });
+      updateFloorSelect();
+      floorSelect.value=name;
+      updateBoxSelect();
     }
+
     if(type==="коробки") {
-      const shelf = archive.shelves.find(s=>s.name===shelfSelect.value); 
-      const floor = shelf?.floors.find(f=>f.name===floorSelect.value); if(!floor) return;
-      floor.boxes.push({ id: floor.boxes.length+1, name:name, cases: [] }); updateBoxSelect(); boxSelect.value=name; renderCases();
+      const shelf = archive.shelves.find(s => s.name===shelfSelect.value);
+      const floor = shelf?.floors.find(f => f.name===floorSelect.value); if(!floor) return;
+      floor.boxes.push({ id: floor.boxes.length+1, name:name, cases: [] });
+      updateBoxSelect();
+      boxSelect.value=name;
+      renderCases();
     }
+
+  } else {
+    if(type==="полки") updateFloorSelect();
+    if(type==="этажа") updateBoxSelect();
+    if(type==="коробки") renderCases();
   }
 }
 
 // --- слушатели ---
-shelfSelect.addEventListener('change', ()=>handleSelectAdd(shelfSelect, "полки"));
-floorSelect.addEventListener('change', ()=>handleSelectAdd(floorSelect, "этажа"));
-boxSelect.addEventListener('change', ()=>handleSelectAdd(boxSelect, "коробки"));
+shelfSelect.addEventListener('change', ()=>handleAdd(shelfSelect,"полки"));
+floorSelect.addEventListener('change', ()=>handleAdd(floorSelect,"этажа"));
+boxSelect.addEventListener('change', ()=>handleAdd(boxSelect,"коробки"));
 
 // --- дела ---
 function renderCases() {
@@ -219,10 +240,10 @@ copyJsonBtn.addEventListener('click', ()=>{
 // --- открыть JSON в отдельной странице ---
 openJsonBtn.addEventListener('click', ()=>{
   const w = window.open("", "_blank");
-  w.document.write("<pre>"+JSON.stringify(archive,null,2)+"</pre>");
+  w.document.write("<pre style='font-size:20px; padding:20px;'>"+JSON.stringify(archive,null,2)+"</pre>");
   w.document.title = "Archive JSON";
 });
-
 </script>
+
 </body>
 </html>
