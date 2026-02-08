@@ -1,24 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Электронный архив</title>
+  <title>Архивный реестр</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <header>
+    <h1>Архивный реестр</h1>
+  </header>
 
-<header>
-  <h1>Электронный архив</h1>
-</header>
+  <!-- Кнопки выбора полок (опционально) -->
+  <div id="shelf-buttons" style="text-align:center; margin:10px 0;">
+    <button onclick="filterByShelf(9)">Полка 9</button>
+    <button onclick="filterByShelf(10)">Полка 10</button>
+  </div>
 
-<main>
-  <p>Загрузка архива...</p>
-</main>
+  <!-- Поиск -->
+  <input id="search" placeholder="Поиск..." style="width:95%; max-width:500px; padding:12px; font-size:18px; margin:10px auto; display:block; border-radius:12px; border:1px solid #cbd5e1;">
+  <button id="searchBtn" style="display:block; margin:5px auto; padding:10px 20px; font-size:18px; border-radius:10px; background:#2563eb; color:white; border:none;">Найти</button>
 
-<div class="footer">
-  Электронный реестр архива
-</div>
+  <main></main>
 
-<script src="js/app.js"></script>
+  <footer class="footer">Архивный реестр</footer>
+
+  <script src="js/app.js"></script>
 </body>
 </html>
