@@ -5,8 +5,8 @@ body {
   margin: 0;
   padding: 0;
   color: #1f2933;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 18px;
+  line-height: 1.6;
 }
 
 /* Хедер */
@@ -19,35 +19,53 @@ header {
 
 header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 26px;
 }
 
-/* Контент */
+/* Поле поиска */
+#search {
+  width: 95%;
+  max-width: 500px;
+  margin: 15px auto;
+  display: block;
+  padding: 12px 15px;
+  font-size: 18px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Контейнер */
 main {
   max-width: 900px;
-  margin: 20px auto;
-  padding: 0 10px; /* адаптивно под телефон */
+  margin: 0 auto 40px;
+  padding: 0 10px;
 }
 
-/* Карточки полок, этажей, коробок */
+/* Карточки */
 .card {
   background: white;
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
+/* Заголовки */
 .card h2, .card h3, .card h4 {
-  margin: 0 0 8px 0;
+  margin: 0 0 10px 0;
   cursor: pointer;
 }
+
+.card h2 { font-size: 24px; color: #1e40af; }
+.card h3 { font-size: 22px; color: #2563eb; }
+.card h4 { font-size: 20px; color: #1d4ed8; }
 
 /* Списки дел */
 ul {
@@ -56,7 +74,8 @@ ul {
 }
 
 li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  font-size: 18px;
 }
 
 /* Ссылки */
@@ -80,12 +99,15 @@ a:hover {
 /* Адаптивность для мобильных */
 @media (max-width: 600px) {
   body {
-    font-size: 18px;
-  }
-  header h1 {
     font-size: 20px;
   }
-  .card {
-    padding: 14px 16px;
+  header h1 {
+    font-size: 22px;
   }
+  .card {
+    padding: 16px 18px;
+  }
+  .card h2 { font-size: 22px; }
+  .card h3 { font-size: 20px; }
+  .card h4 { font-size: 18px; }
 }
