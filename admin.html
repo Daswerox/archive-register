@@ -1,7 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Админка Архива</title>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<header>
+  <h1>Админка Архива</h1>
+</header>
+
 <div id="controls">
   <h2>Управление архивом</h2>
 
-  <!-- Выпадающие списки для выбора -->
+  <!-- Выбор структуры -->
   <label>Полка:</label>
   <select id="shelfSelect"></select>
   <label>Этаж:</label>
@@ -9,20 +21,18 @@
   <label>Коробка:</label>
   <select id="boxSelect"></select>
 
-  <!-- Добавление нового дела -->
-  <label>Содержимое коробки:</label>
+  <!-- Редактирование содержимого коробки -->
+  <h3>Содержимое коробки:</h3>
   <div id="caseList"></div>
   <input type="text" id="newCaseInput" placeholder="Добавить новое дело">
-
-  <!-- Разделение кнопок по функционалу -->
-  <div style="margin-top:10px;">
-    <button id="addBtn">Добавить</button>
-    <button id="editBtn">Редактировать выбранное дело</button>
-    <button id="deleteBtn">Удалить выбранное дело / коробку / этаж / полку</button>
-  </div>
+  <button id="addCaseBtn">Добавить дело</button>
 
   <!-- Экспорт таблицы -->
-  <button id="exportBtn" style="margin-top:10px;">Показать / Скрыть список</button>
+  <button id="exportBtn">Показать / Скрыть список</button>
 </div>
 
 <div id="tableContainer" style="display:none;"></div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>
