@@ -54,6 +54,7 @@ th,td{border:1px solid #cbd5e1;padding:8px;text-align:left;}
 
 </div>
 
+
 <script>
 let archive = { shelves: [] };
 
@@ -75,108 +76,113 @@ const deleteFloorBtn = document.getElementById('deleteFloorBtn');
 const editBoxBtn = document.getElementById('editBoxBtn');
 const deleteBoxBtn = document.getElementById('deleteBoxBtn');
 
-// --- загрузка JSON ---
+// ---------- загрузка ----------
 fetch('data/archive.json')
   .then(r => r.ok ? r.json() : { shelves: [] })
   .then(data => { archive = data; updateShelfSelect(); })
-  .catch(() => { archive = { shelves: [] }; updateShelfSelect(); });
+  .catch(() => updateShelfSelect());
 
-// --- обновление dropdown ---
+// ---------- helpers ----------
+function addAddOption(select, text) {
+  select.appendChild(new Option(text, "__add__"));
+}
+
+function clearBelow(level) {
+  if (level <= 1) floorSelect.innerHTML = '';
+  if (level <= 2) boxSelect.innerHTML = '';
+  if (level <= 3) caseList.innerHTML = '';
+}
+
+// ---------- обновление ----------
 function updateShelfSelect() {
   shelfSelect.innerHTML = '';
-  archive.shelves.forEach(s => {
-    const o = document.createElement('option');
-    o.value = s.name;
-    o.textContent = s.name;
-    shelfSelect.appendChild(o);
-  });
-  shelfSelect.appendChild(new Option("Добавить полку", "__add__"));
-  shelfSelect.value ||= "__add__";
+  archive.shelves.forEach(s => shelfSelect.appendChild(new Option(s.name, s.name)));
+  addAddOption(shelfSelect, "Добавить полку");
+  shelfSelect.value = archive.shelves[0]?.name || "__add__";
   updateFloorSelect();
 }
 
 function updateFloorSelect() {
   floorSelect.innerHTML = '';
+  clearBelow(2);
+
   const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
   if (!shelf) return;
-  shelf.floors.forEach(f => {
-    const o = document.createElement('option');
-    o.value = f.name;
-    o.textContent = f.name;
-    floorSelect.appendChild(o);
-  });
-  floorSelect.appendChild(new Option("Добавить этаж", "__add__"));
-  floorSelect.value ||= "__add__";
-  updateBoxSelect();
+
+  shelf.floors.forEach(f => floorSelect.appendChild(new Option(f.name, f.name)));
+  addAddOption(floorSelect, "Добавить этаж");
+  floorSelect.value = "__add__";
 }
 
 function updateBoxSelect() {
   boxSelect.innerHTML = '';
+  clearBelow(3);
+
   const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
   const floor = shelf?.floors.find(f => f.name === floorSelect.value);
   if (!floor) return;
-  floor.boxes.forEach(b => {
-    const o = document.createElement('option');
-    o.value = b.name;
-    o.textContent = b.name;
-    boxSelect.appendChild(o);
-  });
-  boxSelect.appendChild(new Option("Добавить коробку", "__add__"));
-  boxSelect.value ||= "__add__";
-  renderCases();
+
+  floor.boxes.forEach(b => boxSelect.appendChild(new Option(b.name, b.name)));
+  addAddOption(boxSelect, "Добавить коробку");
+  boxSelect.value = "__add__";
 }
 
-// --- добавление ---
-function handleAdd(selectEl, type) {
-  if (selectEl.value !== "__add__") {
-    if (type === "полки") updateFloorSelect();
-    if (type === "этажа") updateBoxSelect();
-    if (type === "коробки") renderCases();
+// ---------- добавление ----------
+shelfSelect.onchange = () => {
+  if (shelfSelect.value !== "__add__") {
+    updateFloorSelect();
+    return;
+  }
+  const name = prompt("Название новой полки:");
+  if (!name) { updateShelfSelect(); return; }
+
+  archive.shelves.push({ id: Date.now(), name, floors: [] });
+  updateShelfSelect();
+  shelfSelect.value = name;
+  updateFloorSelect();
+};
+
+floorSelect.onchange = () => {
+  if (floorSelect.value !== "__add__") {
+    updateBoxSelect();
     return;
   }
 
-  const name = prompt(`Название новой ${type}:`);
-  if (!name) return;
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  if (!shelf) return;
 
-  if (type === "полки") {
-    archive.shelves.push({ id: Date.now(), name, floors: [] });
-    updateShelfSelect();
-    shelfSelect.value = name;
+  const name = prompt("Название нового этажа:");
+  if (!name) { updateFloorSelect(); return; }
+
+  shelf.floors.push({ id: Date.now(), name, boxes: [] });
+  updateFloorSelect();
+  floorSelect.value = name;
+  updateBoxSelect();
+};
+
+boxSelect.onchange = () => {
+  if (boxSelect.value !== "__add__") {
+    renderCases();
+    return;
   }
 
-  if (type === "этажа") {
-    const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
-    if (!shelf) return;
-    shelf.floors.push({ id: Date.now(), name, boxes: [] });
-    updateFloorSelect();
-    floorSelect.value = name;
-  }
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  const floor = shelf?.floors.find(f => f.name === floorSelect.value);
+  if (!floor) return;
 
-  if (type === "коробки") {
-    const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
-    const floor = shelf?.floors.find(f => f.name === floorSelect.value);
-    if (!floor) return;
-    floor.boxes.push({ id: Date.now(), name, cases: [] });
-    updateBoxSelect();
-    boxSelect.value = name;
-  }
-}
+  const name = prompt("Название новой коробки:");
+  if (!name) { updateBoxSelect(); return; }
 
-// --- фикc: change + click ---
-function bindSelect(select, type) {
-  select.addEventListener('change', () => handleAdd(select, type));
-  select.addEventListener('click', () => {
-    if (select.value === "__add__") handleAdd(select, type);
-  });
-}
+  floor.boxes.push({ id: Date.now(), name, cases: [] });
+  updateBoxSelect();
+  boxSelect.value = name;
+  renderCases();
+};
 
-bindSelect(shelfSelect, "полки");
-bindSelect(floorSelect, "этажа");
-bindSelect(boxSelect, "коробки");
-
-// --- дела ---
+// ---------- дела ----------
 function renderCases() {
   caseList.innerHTML = '';
+
   const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
   const floor = shelf?.floors.find(f => f.name === floorSelect.value);
   const box = floor?.boxes.find(b => b.name === boxSelect.value);
@@ -201,13 +207,48 @@ addCaseBtn.onclick = () => {
   const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
   const floor = shelf?.floors.find(f => f.name === floorSelect.value);
   const box = floor?.boxes.find(b => b.name === boxSelect.value);
-  if (!box || !newCaseInput.value.trim()) return;
-  box.cases.push(newCaseInput.value.trim());
+  if (!box) return;
+
+  const text = newCaseInput.value.trim();
+  if (!text) return;
+
+  box.cases.push(text);
   newCaseInput.value = '';
   renderCases();
 };
-</script>
 
+// ---------- таблица ----------
+toggleTableBtn.onclick = () => {
+  if (tableContainer.style.display === "block") {
+    tableContainer.style.display = "none";
+    toggleTableBtn.textContent = "Показать список";
+    return;
+  }
+
+  let html = "<table><tr><th>Полка</th><th>Этаж</th><th>Коробка</th><th>Содержимое</th></tr>";
+  archive.shelves.forEach(s =>
+    s.floors.forEach(f =>
+      f.boxes.forEach(b =>
+        html += `<tr><td>${s.name}</td><td>${f.name}</td><td>${b.name}</td><td>${b.cases.join(", ")}</td></tr>`
+      )
+    )
+  );
+  html += "</table>";
+
+  tableContainer.innerHTML = html;
+  tableContainer.style.display = "block";
+  toggleTableBtn.textContent = "Скрыть список";
+};
+
+// ---------- json ----------
+copyJsonBtn.onclick = () =>
+  navigator.clipboard.writeText(JSON.stringify(archive, null, 2));
+
+openJsonBtn.onclick = () => {
+  const w = window.open();
+  w.document.write("<pre>" + JSON.stringify(archive, null, 2) + "</pre>");
+};
+</script>
 
 
 </body>
