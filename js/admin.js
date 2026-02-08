@@ -1,65 +1,132 @@
-// ===== Добавление =====
-addBtn.addEventListener('click', ()=> {
-  const shelfName = shelfSelect.value;
-  const floorName = floorSelect.value;
-  const boxName = boxSelect.value;
-  const text = newCaseInput.value.trim();
-  if(!text) {
-    alert("Введите дело для добавления");
-    return;
-  }
+let archive = null;
+const shelfSelect = document.getElementById('shelfSelect');
+const floorSelect = document.getElementById('floorSelect');
+const boxSelect = document.getElementById('boxSelect');
+const caseList = document.getElementById('caseList');
+const newCaseInput = document.getElementById('newCaseInput');
+const addCaseBtn = document.getElementById('addCaseBtn');
+const exportBtn = document.getElementById('exportBtn');
 
-  // Найти или создать структуру
-  let shelf = archive.shelves.find(s=>s.name===shelfName);
-  if(!shelf) { shelf={id:archive.shelves.length+1,name:shelfName,floors:[]}; archive.shelves.push(shelf); }
+// ===== Загрузка данных =====
+fetch('data/archive.json')
+  .then(res => res.json())
+  .then(json => {
+    archive = json;
+    updateShelfSelect();
+  })
+  .catch(err => alert("Ошибка загрузки archive.json: " + err));
 
-  let floor = shelf.floors.find(f=>f.name===floorName);
-  if(!floor){ floor={id:shelf.floors.length+1,name:floorName,boxes:[]}; shelf.floors.push(floor); }
+// ===== Обновление выпадающих списков =====
+function updateShelfSelect() {
+  shelfSelect.innerHTML = '';
+  archive.shelves.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.name; opt.textContent = s.name;
+    shelfSelect.appendChild(opt);
+  });
+  const addOpt = document.createElement('option'); addOpt.value="__add__"; addOpt.textContent="Добавить полку"; shelfSelect.appendChild(addOpt);
+  updateFloorSelect();
+}
 
-  let box = floor.boxes.find(b=>b.name===boxName);
-  if(!box){ box={id:floor.boxes.length+1,name:boxName,cases:[]}; floor.boxes.push(box); }
+function updateFloorSelect() {
+  floorSelect.innerHTML = '';
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  if(!shelf) return;
+  shelf.floors.forEach(f=>{
+    const opt=document.createElement('option'); opt.value=f.name; opt.textContent=f.name; floorSelect.appendChild(opt);
+  });
+  const addOpt = document.createElement('option'); addOpt.value="__add__"; addOpt.textContent="Добавить этаж"; floorSelect.appendChild(addOpt);
+  updateBoxSelect();
+}
 
-  box.cases.push(text);
-  newCaseInput.value="";
+function updateBoxSelect(){
+  boxSelect.innerHTML='';
+  const shelf = archive.shelves.find(s=>s.name===shelfSelect.value);
+  const floor = shelf?.floors.find(f=>f.name===floorSelect.value);
+  if(!floor) return;
+  floor.boxes.forEach(b=>{
+    const opt=document.createElement('option'); opt.value=b.name; opt.textContent=b.name; boxSelect.appendChild(opt);
+  });
+  const addOpt = document.createElement('option'); addOpt.value="__add__"; addOpt.textContent="Добавить коробку"; boxSelect.appendChild(addOpt);
   renderCases();
-  alert("Добавлено");
+}
+
+// ===== Добавление новых элементов через "Добавить" =====
+shelfSelect.addEventListener('change', ()=>{
+  if(shelfSelect.value==="__add__"){
+    const name = prompt("Название новой полки:");
+    if(name){ archive.shelves.push({id:archive.shelves.length+1,name:name,floors:[]}); updateShelfSelect(); }
+  } else updateFloorSelect();
 });
 
-// ===== Редактирование =====
-editBtn.addEventListener('click', ()=>{
-  const shelfName = shelfSelect.value;
-  const floorName = floorSelect.value;
-  const boxName = boxSelect.value;
-
-  const shelf = archive.shelves.find(s=>s.name===shelfName);
-  if(!shelf){ alert("Полка не найдена"); return; }
-  const floor = shelf.floors.find(f=>f.name===floorName);
-  if(!floor){ alert("Этаж не найден"); return; }
-  const box = floor.boxes.find(b=>b.name===boxName);
-  if(!box){ alert("Коробка не найдена"); return; }
-
-  // Выбираем запись для редактирования
-  const oldVal = prompt("Введите текст для редактирования", box.cases[0]||"");
-  if(oldVal!==null && box.cases.length>0){
-    box.cases[0]=oldVal;
-    renderCases();
-    alert("Изменено");
-  }
+floorSelect.addEventListener('change', ()=>{
+  if(floorSelect.value==="__add__"){
+    const shelf = archive.shelves.find(s=>s.name===shelfSelect.value);
+    const name = prompt("Название нового этажа:");
+    if(name){ shelf.floors.push({id:shelf.floors.length+1,name:name,boxes:[]}); updateFloorSelect(); }
+  } else updateBoxSelect();
 });
 
-// ===== Удаление =====
-deleteBtn.addEventListener('click', ()=>{
-  const shelfName = shelfSelect.value;
-  const floorName = floorSelect.value;
-  const boxName = boxSelect.value;
+boxSelect.addEventListener('change', ()=>{
+  if(boxSelect.value==="__add__"){
+    const shelf = archive.shelves.find(s=>s.name===shelfSelect.value);
+    const floor = shelf.floors.find(f=>f.name===floorSelect.value);
+    const name = prompt("Название новой коробки:");
+    if(name){ floor.boxes.push({id:floor.boxes.length+1,name:name,cases:[]}); updateBoxSelect(); }
+  } else renderCases();
+});
 
-  if(confirm("Удалить выбранную коробку и все дела внутри?")){
-    const shelf = archive.shelves.find(s=>s.name===shelfName);
-    if(!shelf) return;
-    const floor = shelf.floors.find(f=>f.name===floorName);
-    if(!floor) return;
-    floor.boxes = floor.boxes.filter(b=>b.name!==boxName);
-    renderCases();
-    alert("Коробка удалена");
-  }
+// ===== Рендер содержимого коробки =====
+function renderCases(){
+  caseList.innerHTML='';
+  const shelf = archive.shelves.find(s=>s.name===shelfSelect.value);
+  const floor = shelf?.floors.find(f=>f.name===floorSelect.value);
+  const box = floor?.boxes.find(b=>b.name===boxSelect.value);
+  if(!box) return;
+
+  box.cases.forEach((c,i)=>{
+    const div=document.createElement('div'); div.className="case-item";
+
+    const input=document.createElement('input'); input.value=c;
+    input.addEventListener('change', ()=>{ box.cases[i]=input.value; });
+
+    const editBtn=document.createElement('button'); editBtn.textContent="Ред."; editBtn.className="edit-btn";
+    editBtn.addEventListener('click', ()=>{ const newVal=prompt("Редактировать дело", box.cases[i]); if(newVal!==null){ box.cases[i]=newVal; renderCases(); } });
+
+    const delBtn=document.createElement('button'); delBtn.textContent="Удал."; delBtn.className="delete-btn";
+    delBtn.addEventListener('click', ()=>{ if(confirm("Удалить запись?")){ box.cases.splice(i,1); renderCases(); } });
+
+    div.appendChild(input); div.appendChild(editBtn); div.appendChild(delBtn);
+    caseList.appendChild(div);
+  });
+}
+
+// ===== Добавление нового дела =====
+addCaseBtn.addEventListener('click', ()=>{
+  const shelf = archive.shelves.find(s=>s.name===shelfSelect.value);
+  const floor = shelf?.floors.find(f=>f.name===floorSelect.value);
+  const box = floor?.boxes.find(b=>b.name===boxSelect.value);
+  if(!box) return;
+  const text = newCaseInput.value.trim(); if(!text) return;
+  box.cases.push(text);
+  newCaseInput.value='';
+  renderCases();
+});
+
+// ===== Экспорт таблицы =====
+exportBtn.addEventListener('click', ()=>{
+  if(tableContainer.style.display==="block"){ tableContainer.style.display="none"; return; }
+
+  let html="<table><tr><th>Полка</th><th>Этаж</th><th>Коробка</th><th>Содержимое</th></tr>";
+  archive.shelves.forEach(s=>{
+    s.floors.forEach(f=>{
+      f.boxes.forEach(b=>{
+        const content=b.cases.join(", ");
+        html+=`<tr><td>${s.name}</td><td>${f.name}</td><td>${b.name}</td><td>${content}</td></tr>`;
+      });
+    });
+  });
+  html+="</table>";
+  tableContainer.innerHTML=html;
+  tableContainer.style.display="block";
 });
