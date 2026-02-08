@@ -74,11 +74,20 @@ const deleteBoxBtn=document.getElementById('deleteBoxBtn');
 const toggleTableBtn=document.getElementById('toggleTableBtn');
 const tableContainer=document.getElementById('tableContainer');
 
-fetch('data/archive.json').then(r=>r.ok?r.json():{shelves:[]}).then(data=>{
+// --- загрузка archive.json с GitHub Pages ---
+fetch('data/archive.json')
+.then(r=>r.ok?r.json():{shelves:[]})
+.then(data=>{
   archive=data;
   updateShelfSelect();
-}).catch(err=>{console.error(err); archive={shelves:[]}; updateShelfSelect();});
+})
+.catch(err=>{
+  console.error(err);
+  archive={shelves:[]};
+  updateShelfSelect();
+});
 
+// --- обновление dropdown ---
 function updateShelfSelect(){
   shelfSelect.innerHTML='';
   archive.shelves.forEach(s=>{
@@ -107,49 +116,51 @@ function updateBoxSelect(){
   renderCases();
 }
 
-shelfSelect.addEventListener('change',()=>{
-  if(shelfSelect.value==="__add__"){
-    const name=prompt("Название новой полки:");
-    if(name){
-      const newShelf={id:archive.shelves.length+1,name:name,floors:[]};
+// --- Добавление новых элементов ---
+shelfSelect.addEventListener('change', () => {
+  if (shelfSelect.value === "__add__") {
+    const name = prompt("Название новой полки:");
+    if (name) {
+      const newShelf = { id: archive.shelves.length + 1, name: name, floors: [] };
       archive.shelves.push(newShelf);
       updateShelfSelect();
-      shelfSelect.value=name;
+      shelfSelect.value = name;
       updateFloorSelect();
       updateBoxSelect();
     }
   } else updateFloorSelect();
 });
 
-floorSelect.addEventListener('change',()=>{
-  const shelf=archive.shelves.find(s=>s.name===shelfSelect.value);
-  if(floorSelect.value==="__add__"){
-    const name=prompt("Название нового этажа:");
-    if(name && shelf){
-      const newFloor={id:shelf.floors.length+1,name:name,boxes:[]};
+floorSelect.addEventListener('change', () => {
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  if (floorSelect.value === "__add__") {
+    const name = prompt("Название нового этажа:");
+    if (name && shelf) {
+      const newFloor = { id: shelf.floors.length + 1, name: name, boxes: [] };
       shelf.floors.push(newFloor);
       updateFloorSelect();
-      floorSelect.value=name;
+      floorSelect.value = name;
       updateBoxSelect();
     }
   } else updateBoxSelect();
 });
 
-boxSelect.addEventListener('change',()=>{
-  const shelf=archive.shelves.find(s=>s.name===shelfSelect.value);
-  const floor=shelf?.floors.find(f=>f.name===floorSelect.value);
-  if(boxSelect.value==="__add__" && floor){
-    const name=prompt("Название новой коробки:");
-    if(name){
-      const newBox={id:floor.boxes.length+1,name:name,cases:[]};
+boxSelect.addEventListener('change', () => {
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  const floor = shelf?.floors.find(f => f.name === floorSelect.value);
+  if (boxSelect.value === "__add__" && floor) {
+    const name = prompt("Название новой коробки:");
+    if (name) {
+      const newBox = { id: floor.boxes.length + 1, name: name, cases: [] };
       floor.boxes.push(newBox);
       updateBoxSelect();
-      boxSelect.value=name;
+      boxSelect.value = name;
       renderCases();
     }
   } else renderCases();
 });
 
+// --- работа с делами ---
 function renderCases(){
   caseList.innerHTML='';
   const shelf=archive.shelves.find(s=>s.name===shelfSelect.value);
@@ -177,6 +188,7 @@ addCaseBtn.addEventListener('click',()=>{
   box.cases.push(text); newCaseInput.value=''; renderCases();
 });
 
+// --- редактирование и удаление ---
 editShelfBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.name===shelfSelect.value); if(!s) return; const n=prompt("Редактировать полку",s.name); if(n){ s.name=n; updateShelfSelect(); }});
 deleteShelfBtn.addEventListener('click',()=>{ if(confirm("Удалить полку и всё внутри?")){ archive.shelves=archive.shelves.filter(s=>s.name!==shelfSelect.value); updateShelfSelect(); }});
 editFloorBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.name===shelfSelect.value); const f=s?.floors.find(f=>f.name===floorSelect.value); if(!f) return; const n=prompt("Редактировать этаж",f.name); if(n){ f.name=n; updateFloorSelect(); }});
@@ -184,6 +196,7 @@ deleteFloorBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.
 editBoxBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.name===shelfSelect.value); const f=s?.floors.find(f=>f.name===floorSelect.value); const b=f?.boxes.find(b=>b.name===boxSelect.value); if(!b) return; const n=prompt("Редактировать коробку",b.name); if(n){ b.name=n; updateBoxSelect(); }});
 deleteBoxBtn.addEventListener('click',()=>{ const s=archive.shelves.find(s=>s.name===shelfSelect.value); const f=s?.floors.find(f=>f.name===floorSelect.value); const b=f?.boxes.find(b=>b.name===boxSelect.value); if(!b) return; if(confirm("Удалить коробку и всё внутри?")){ f.boxes=f.boxes.filter(bx=>bx.name!==boxSelect.value); updateBoxSelect(); }});
 
+// --- таблица списка ---
 toggleTableBtn.addEventListener('click',()=>{
   if(tableContainer.style.display==="block"){ tableContainer.style.display="none"; toggleTableBtn.textContent="Показать список"; }
   else{
@@ -203,6 +216,7 @@ toggleTableBtn.addEventListener('click',()=>{
   }
 });
 
+// --- копирование JSON ---
 copyJsonBtn.addEventListener('click',()=>{
   const jsonStr=JSON.stringify(archive,null,2);
   jsonOutput.value=jsonStr;
