@@ -88,7 +88,7 @@ function updateShelfSelect() {
     const o = document.createElement('option'); o.value = s.name; o.textContent = s.name; shelfSelect.appendChild(o);
   });
   const addOpt = document.createElement('option'); addOpt.value = "__add__"; addOpt.textContent = "Добавить полку"; shelfSelect.appendChild(addOpt);
-  shelfSelect.value = shelfSelect.value || (archive.shelves[0]?.name ?? "__add__");
+  if(!archive.shelves.length) shelfSelect.value="__add__";
   updateFloorSelect();
 }
 
@@ -98,7 +98,7 @@ function updateFloorSelect() {
   if (!shelf) { caseList.innerHTML=''; return; }
   shelf.floors.forEach(f => { const o = document.createElement('option'); o.value = f.name; o.textContent = f.name; floorSelect.appendChild(o); });
   const addOpt = document.createElement('option'); addOpt.value = "__add__"; addOpt.textContent = "Добавить этаж"; floorSelect.appendChild(addOpt);
-  floorSelect.value = floorSelect.value || (shelf.floors[0]?.name ?? "__add__");
+  if(!shelf.floors.length) floorSelect.value="__add__";
   updateBoxSelect();
 }
 
@@ -109,7 +109,7 @@ function updateBoxSelect() {
   if (!floor) { caseList.innerHTML=''; return; }
   floor.boxes.forEach(b => { const o = document.createElement('option'); o.value = b.name; o.textContent = b.name; boxSelect.appendChild(o); });
   const addOpt = document.createElement('option'); addOpt.value = "__add__"; addOpt.textContent = "Добавить коробку"; boxSelect.appendChild(addOpt);
-  boxSelect.value = boxSelect.value || (floor.boxes[0]?.name ?? "__add__");
+  if(!floor.boxes.length) boxSelect.value="__add__";
   renderCases();
 }
 
@@ -120,24 +120,27 @@ function handleAdd(selectEl, type) {
     if(!name) return;
 
     if(type==="полки") { 
-      archive.shelves.push({ id: archive.shelves.length+1, name:name, floors: [] });
+      const newShelf = { id: archive.shelves.length+1, name:name, floors: [] };
+      archive.shelves.push(newShelf);
       updateShelfSelect(); 
-      shelfSelect.value=name; 
-      updateFloorSelect();
+      shelfSelect.value = name;
+      updateFloorSelect(); // теперь можно добавлять этажи
     }
 
     if(type==="этажа") {
       const shelf = archive.shelves.find(s=>s.name===shelfSelect.value); if(!shelf) return;
-      shelf.floors.push({ id: shelf.floors.length+1, name:name, boxes: [] });
+      const newFloor = { id: shelf.floors.length+1, name:name, boxes: [] };
+      shelf.floors.push(newFloor);
       updateFloorSelect();
-      floorSelect.value=name;
-      updateBoxSelect();
+      floorSelect.value = name;
+      updateBoxSelect(); // теперь можно добавлять коробки
     }
 
     if(type==="коробки") {
       const shelf = archive.shelves.find(s => s.name===shelfSelect.value);
       const floor = shelf?.floors.find(f => f.name===floorSelect.value); if(!floor) return;
-      floor.boxes.push({ id: floor.boxes.length+1, name:name, cases: [] });
+      const newBox = { id: floor.boxes.length+1, name:name, cases: [] };
+      floor.boxes.push(newBox);
       updateBoxSelect();
       boxSelect.value=name;
       renderCases();
@@ -244,6 +247,7 @@ openJsonBtn.addEventListener('click', ()=>{
   w.document.title = "Archive JSON";
 });
 </script>
+
 
 </body>
 </html>
