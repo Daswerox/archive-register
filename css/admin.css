@@ -1,40 +1,50 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background: #f0f4f8;
-  color: #1f2933;
   font-size: 24px;
   margin: 0;
   padding: 0;
+  background-color: #f0f4f8;
+  color: #1f2933;
 }
 
 header {
   background-color: #2563eb;
   color: white;
   text-align: center;
-  padding: 25px;
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 header h1 {
-  font-size: 32px;
   margin: 0;
+  font-size: 28px;
 }
 
 #controls {
-  padding: 20px;
+  padding: 16px;
+  margin: 16px;
   background: white;
   border-radius: 16px;
-  margin: 16px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
-#controls input, #controls select, #controls button {
-  font-size: 24px;
-  padding: 12px;
+#controls label {
+  display: block;
+  margin-top: 12px;
+  font-weight: bold;
+}
+
+#controls select,
+#controls input,
+#controls button {
+  font-size: 22px;
+  padding: 10px;
   margin: 6px 0;
-  width: 100%;
-  max-width: 500px;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid #cbd5e1;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -43,10 +53,16 @@ header h1 {
   color: white;
   border: none;
   cursor: pointer;
+  margin-top: 4px;
 }
 
-#caseList {
-  margin-top: 10px;
+.scrollable {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #cbd5e1;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 10px;
 }
 
 .case-item {
@@ -58,33 +74,34 @@ header h1 {
 }
 
 .case-item input {
-  font-size: 22px;
-  flex: 1;
+  flex: 1 1 60%;
   margin-right: 6px;
-  padding: 6px;
   margin-bottom: 4px;
+  font-size: 22px;
+  padding: 6px;
 }
 
 .case-item button {
-  font-size: 20px;
-  padding: 6px 12px;
+  flex: 1 1 18%;
   margin-bottom: 4px;
+  font-size: 20px;
+  padding: 6px;
   border-radius: 8px;
+  border: none;
 }
 
-.case-item .edit-btn { background-color: #f59e0b; color: white; border: none; }
-.case-item .delete-btn { background-color: #ef4444; color: white; border: none; }
+.case-item .edit-btn { background-color: #f59e0b; color: white; }
+.case-item .delete-btn { background-color: #ef4444; color: white; }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 table th, table td {
   border: 1px solid #ccc;
   padding: 12px;
-  text-align: left;
   font-size: 22px;
 }
 
