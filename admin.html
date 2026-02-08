@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Админ панель архива</title>
+<title>Админка Архива</title>
 <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
@@ -11,22 +11,25 @@
 </header>
 
 <div id="controls">
-  <h2>Добавить / Редактировать</h2>
-  
-  <label>Выбор действия:</label>
-  <select id="action">
-    <option value="add">Добавить</option>
-    <option value="edit">Редактировать / Удалить</option>
-  </select>
+  <h2>Управление архивом</h2>
 
-  <br><br>
+  <div>
+    <label>Выбор действия:</label>
+    <select id="action">
+      <option value="add">Добавить</option>
+      <option value="edit">Редактировать / Удалить</option>
+    </select>
+  </div>
+
+  <br>
 
   <label>Полка:</label>
-  <input type="text" id="shelfInput" placeholder="Полка 9">
+  <select id="shelfSelect"></select>
   <label>Этаж:</label>
-  <input type="text" id="floorInput" placeholder="Этаж 2">
+  <select id="floorSelect"></select>
   <label>Коробка:</label>
-  <input type="text" id="boxInput" placeholder="Коробка 1">
+  <select id="boxSelect"></select>
+  
   <label>Содержимое коробки:</label>
   <input type="text" id="caseInput" placeholder="Платонов И.И., Иванова А.А.">
 
@@ -35,7 +38,7 @@
   <button id="exportBtn">Показать список</button>
 </div>
 
-<div id="tableContainer"></div>
+<div id="tableContainer" style="display:none;"></div>
 
 <script src="js/admin.js"></script>
 </body>
