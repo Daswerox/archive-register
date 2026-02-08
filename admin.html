@@ -63,11 +63,10 @@ th,td{border:1px solid #cbd5e1;padding:8px;text-align:left;}
   <button id="openJsonBtn">Открыть JSON</button>
 
 </div>
-
-
 <script>
 let archive = { shelves: [] };
 
+// селекты и кнопки
 const shelfSelect = document.getElementById('shelfSelect');
 const floorSelect = document.getElementById('floorSelect');
 const boxSelect = document.getElementById('boxSelect');
@@ -81,19 +80,26 @@ const addShelfBtn = document.getElementById('addShelfBtn');
 const addFloorBtn = document.getElementById('addFloorBtn');
 const addBoxBtn = document.getElementById('addBoxBtn');
 
-// ---------- загрузка ----------
+const editShelfBtn = document.getElementById('editShelfBtn');
+const deleteShelfBtn = document.getElementById('deleteShelfBtn');
+const editFloorBtn = document.getElementById('editFloorBtn');
+const deleteFloorBtn = document.getElementById('deleteFloorBtn');
+const editBoxBtn = document.getElementById('editBoxBtn');
+const deleteBoxBtn = document.getElementById('deleteBoxBtn');
+const copyJsonBtn = document.getElementById('copyJsonBtn');
+const openJsonBtn = document.getElementById('openJsonBtn');
+
+// ---------- загрузка JSON ----------
 fetch('data/archive.json')
   .then(r => r.ok ? r.json() : { shelves: [] })
   .then(data => { archive = data; updateShelfSelect(); })
   .catch(() => updateShelfSelect());
 
-// ---------- обновление ----------
+// ---------- обновление селектов ----------
 function updateShelfSelect() {
   shelfSelect.innerHTML = '';
-  archive.shelves.forEach(s =>
-    shelfSelect.appendChild(new Option(s.name, s.name))
-  );
-  if (archive.shelves.length) shelfSelect.value = archive.shelves[0].name;
+  archive.shelves.forEach(s => shelfSelect.appendChild(new Option(s.name, s.name)));
+  if (archive.shelves.length) shelfSelect.value = archive.shelves[0]?.name || '';
   updateFloorSelect();
 }
 
@@ -105,10 +111,10 @@ function updateFloorSelect() {
   const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
   if (!shelf) return;
 
-  shelf.floors.forEach(f =>
-    floorSelect.appendChild(new Option(f.name, f.name))
-  );
-  if (shelf.floors.length) floorSelect.value = shelf.floors[0].name;
+  if (shelf.floors.length === 0) return; // новых этажей пока нет
+
+  shelf.floors.forEach(f => floorSelect.appendChild(new Option(f.name, f.name)));
+  floorSelect.value = shelf.floors[0].name;
   updateBoxSelect();
 }
 
@@ -120,10 +126,10 @@ function updateBoxSelect() {
   const floor = shelf?.floors.find(f => f.name === floorSelect.value);
   if (!floor) return;
 
-  floor.boxes.forEach(b =>
-    boxSelect.appendChild(new Option(b.name, b.name))
-  );
-  if (floor.boxes.length) boxSelect.value = floor.boxes[0].name;
+  if (floor.boxes.length === 0) return; // новых коробок пока нет
+
+  floor.boxes.forEach(b => boxSelect.appendChild(new Option(b.name, b.name)));
+  boxSelect.value = floor.boxes[0].name;
   renderCases();
 }
 
@@ -139,41 +145,35 @@ addShelfBtn.onclick = () => {
   archive.shelves.push({ id: Date.now(), name, floors: [] });
   updateShelfSelect();
   shelfSelect.value = name;
+  updateFloorSelect();
 };
 
 addFloorBtn.onclick = () => {
   const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
   if (!shelf) return;
-
   const name = prompt("Название нового этажа:");
   if (!name) return;
-
   shelf.floors.push({ id: Date.now(), name, boxes: [] });
   updateFloorSelect();
   floorSelect.value = name;
+  updateBoxSelect();
 };
 
 addBoxBtn.onclick = () => {
   const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
   const floor = shelf?.floors.find(f => f.name === floorSelect.value);
   if (!floor) return;
-
   const name = prompt("Название новой коробки:");
   if (!name) return;
-
   floor.boxes.push({ id: Date.now(), name, cases: [] });
   updateBoxSelect();
   boxSelect.value = name;
-
-  // 🔥 ВАЖНО
-  renderCases(); // очистит и покажет пустое содержимое новой коробки
+  renderCases(); // важно!
 };
-
 
 // ---------- дела ----------
 function renderCases() {
   caseList.innerHTML = '';
-
   const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
   const floor = shelf?.floors.find(f => f.name === floorSelect.value);
   const box = floor?.boxes.find(b => b.name === boxSelect.value);
@@ -181,16 +181,15 @@ function renderCases() {
 
   box.cases.forEach((c, i) => {
     const div = document.createElement('div');
+    div.className = 'case-item';
+
     const input = document.createElement('input');
     input.value = c;
     input.onchange = () => box.cases[i] = input.value;
 
     const del = document.createElement('button');
     del.textContent = "Удал.";
-    del.onclick = () => {
-      box.cases.splice(i, 1);
-      renderCases();
-    };
+    del.onclick = () => { box.cases.splice(i, 1); renderCases(); };
 
     div.append(input, del);
     caseList.appendChild(div);
@@ -202,13 +201,73 @@ addCaseBtn.onclick = () => {
   const floor = shelf?.floors.find(f => f.name === floorSelect.value);
   const box = floor?.boxes.find(b => b.name === boxSelect.value);
   if (!box) return;
-
   const text = newCaseInput.value.trim();
   if (!text) return;
-
   box.cases.push(text);
   newCaseInput.value = '';
   renderCases();
+};
+
+// ---------- редактирование и удаление ----------
+editShelfBtn.onclick = () => {
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  if (!shelf) return;
+  const name = prompt("Новое название полки:", shelf.name);
+  if (!name) return;
+  shelf.name = name;
+  updateShelfSelect();
+  shelfSelect.value = name;
+};
+
+deleteShelfBtn.onclick = () => {
+  const idx = archive.shelves.findIndex(s => s.name === shelfSelect.value);
+  if (idx !== -1 && confirm("Удалить полку со всем содержимым?")) {
+    archive.shelves.splice(idx, 1);
+    updateShelfSelect();
+  }
+};
+
+editFloorBtn.onclick = () => {
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  const floor = shelf?.floors.find(f => f.name === floorSelect.value);
+  if (!floor) return;
+  const name = prompt("Новое название этажа:", floor.name);
+  if (!name) return;
+  floor.name = name;
+  updateFloorSelect();
+  floorSelect.value = name;
+};
+
+deleteFloorBtn.onclick = () => {
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  const idx = shelf?.floors.findIndex(f => f.name === floorSelect.value);
+  if (idx !== -1 && confirm("Удалить этаж со всем содержимым?")) {
+    shelf.floors.splice(idx, 1);
+    updateFloorSelect();
+  }
+};
+
+editBoxBtn.onclick = () => {
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  const floor = shelf?.floors.find(f => f.name === floorSelect.value);
+  const box = floor?.boxes.find(b => b.name === boxSelect.value);
+  if (!box) return;
+  const name = prompt("Новое название коробки:", box.name);
+  if (!name) return;
+  box.name = name;
+  updateBoxSelect();
+  boxSelect.value = name;
+  renderCases();
+};
+
+deleteBoxBtn.onclick = () => {
+  const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
+  const floor = shelf?.floors.find(f => f.name === floorSelect.value);
+  const idx = floor?.boxes.findIndex(b => b.name === boxSelect.value);
+  if (idx !== -1 && confirm("Удалить коробку со всем содержимым?")) {
+    floor.boxes.splice(idx, 1);
+    updateBoxSelect();
+  }
 };
 
 // ---------- таблица ----------
@@ -218,7 +277,6 @@ toggleTableBtn.onclick = () => {
     toggleTableBtn.textContent = "Показать список";
     return;
   }
-
   let html = "<table><tr><th>Полка</th><th>Этаж</th><th>Коробка</th><th>Содержимое</th></tr>";
   archive.shelves.forEach(s =>
     s.floors.forEach(f =>
@@ -228,12 +286,20 @@ toggleTableBtn.onclick = () => {
     )
   );
   html += "</table>";
-
   tableContainer.innerHTML = html;
   tableContainer.style.display = "block";
   toggleTableBtn.textContent = "Скрыть список";
 };
+
+// ---------- JSON ----------
+copyJsonBtn.onclick = () => navigator.clipboard.writeText(JSON.stringify(archive, null, 2));
+openJsonBtn.onclick = () => {
+  const w = window.open("", "_blank");
+  w.document.write("<pre>" + JSON.stringify(archive, null, 2) + "</pre>");
+  w.document.title = "Archive JSON";
+};
 </script>
+
 
 </body>
 </html>
