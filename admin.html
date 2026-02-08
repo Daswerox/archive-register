@@ -59,7 +59,7 @@ th,td{border:1px solid #cbd5e1;padding:8px;text-align:left;}
   <div id="tableContainer" style="display:none;"></div>
 
   <!-- JSON -->
-  <button id="copyJsonBtn">Скопировать JSON</button>
+  
   <button id="openJsonBtn">Открыть JSON</button>
 
 </div>
@@ -292,12 +292,24 @@ toggleTableBtn.onclick = () => {
 };
 
 // ---------- JSON ----------
-copyJsonBtn.onclick = () => navigator.clipboard.writeText(JSON.stringify(archive, null, 2));
 openJsonBtn.onclick = () => {
   const w = window.open("", "_blank");
-  w.document.write("<pre>" + JSON.stringify(archive, null, 2) + "</pre>");
-  w.document.title = "Archive JSON";
+  w.document.write(`
+    <html>
+      <head>
+        <title>Archive JSON</title>
+        <style>
+          body { margin: 0; padding: 20px; font-family: monospace; font-size: 18px; white-space: pre-wrap; word-break: break-word; }
+          pre { width: 100%; overflow-x: auto; font-size: 18px; }
+        </style>
+      </head>
+      <body>
+        <pre>${JSON.stringify(archive, null, 2)}</pre>
+      </body>
+    </html>
+  `);
 };
+
 </script>
 
 
