@@ -164,7 +164,11 @@ addBoxBtn.onclick = () => {
   floor.boxes.push({ id: Date.now(), name, cases: [] });
   updateBoxSelect();
   boxSelect.value = name;
+
+  // 🔥 ВАЖНО
+  renderCases(); // очистит и покажет пустое содержимое новой коробки
 };
+
 
 // ---------- дела ----------
 function renderCases() {
