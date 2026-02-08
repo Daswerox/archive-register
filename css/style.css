@@ -1,10 +1,10 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background: linear-gradient(to bottom, #e2e8f0, #f5f6f8);
+  background: #f5f6f8;
   margin: 0;
   padding: 0;
   color: #1f2933;
-  font-size: 20px;
+  font-size: 24px; /* увеличено для телефона */
 }
 
 header {
@@ -16,37 +16,90 @@ header {
 
 header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 30px; /* крупнее для телефона */
+}
+
+#search-container {
+  text-align: center;
+  margin: 15px 0;
+}
+
+#search {
+  width: 95%;
+  max-width: 500px;
+  padding: 16px; /* больше, удобнее для пальцев */
+  font-size: 24px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+}
+
+#searchBtn {
+  margin-top: 12px;
+  padding: 14px 28px;
+  font-size: 24px;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  cursor: pointer;
 }
 
 .card {
   background: white;
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 20px;
   margin-bottom: 16px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+/* Отступы между уровнями */
+.card h2 { 
+  font-size: 34px; 
+  color: #1e40af; 
+  cursor: pointer; 
+  margin-bottom: 16px; 
 }
 
-.card h2 { font-size: 32px; color: #1e40af; cursor:pointer; margin-bottom:12px; }
-.card h3 { font-size: 28px; color: #2563eb; cursor:pointer; margin-bottom:10px; }
-.card h4 { font-size: 24px; color: #1d4ed8; cursor:pointer; margin-bottom:8px; }
+.card h3 { 
+  font-size: 30px; 
+  color: #2563eb; 
+  cursor: pointer; 
+  margin-bottom: 14px; 
+  padding-left: 10px;
+}
 
-ul { padding-left: 20px; margin: 0; }
-li { margin-bottom: 10px; font-size: 20px; }
+.card h4 { 
+  font-size: 26px; 
+  color: #1d4ed8; 
+  cursor: pointer; 
+  margin-bottom: 12px; 
+  padding-left: 20px;
+}
+
+ul { 
+  padding-left: 30px; 
+  margin: 0; 
+}
+
+li { 
+  margin-bottom: 12px; 
+  font-size: 24px; 
+}
+
+.footer { 
+  text-align:center; 
+  font-size:18px; 
+  color:#6b7280; 
+  margin:40px 0 20px; 
+}
 
 @media (max-width: 600px) {
-  body { font-size: 20px; }
-  header h1 { font-size: 26px; }
-  .card h2 { font-size: 28px; }
-  .card h3 { font-size: 24px; }
-  .card h4 { font-size: 22px; }
+  body { font-size: 24px; }
+  header h1 { font-size: 28px; }
+  #search { font-size: 24px; padding:16px; }
+  #searchBtn { font-size:24px; padding:14px 28px; }
+  .card h2 { font-size:32px; }
+  .card h3 { font-size:28px; padding-left:10px; }
+  .card h4 { font-size:26px; padding-left:20px; }
+  li { font-size:24px; }
 }
-
-.footer { text-align:center; font-size:14px; color:#6b7280; margin:40px 0 20px; }
-
-button { cursor:pointer; }
