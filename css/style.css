@@ -1,4 +1,3 @@
-/* Общие настройки */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   background: linear-gradient(to bottom, #e2e8f0, #f5f6f8);
@@ -6,10 +5,8 @@ body {
   padding: 0;
   color: #1f2933;
   font-size: 18px;
-  line-height: 1.6;
 }
 
-/* Хедер */
 header {
   background-color: #2563eb;
   color: white;
@@ -22,34 +19,12 @@ header h1 {
   font-size: 26px;
 }
 
-/* Поле поиска */
-#search {
-  width: 95%;
-  max-width: 500px;
-  margin: 15px auto;
-  display: block;
-  padding: 12px 15px;
-  font-size: 18px;
-  border-radius: 12px;
-  border: 1px solid #cbd5e1;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-/* Контейнер */
-main {
-  max-width: 900px;
-  margin: 0 auto 40px;
-  padding: 0 10px;
-}
-
-/* Карточки */
 .card {
   background: white;
   border-radius: 14px;
   padding: 20px;
   margin-bottom: 14px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .card:hover {
@@ -57,57 +32,21 @@ main {
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-/* Заголовки */
-.card h2, .card h3, .card h4 {
-  margin: 0 0 10px 0;
-  cursor: pointer;
-}
+.card h2 { font-size: 30px; color: #1e40af; cursor:pointer; margin-bottom:10px; }
+.card h3 { font-size: 26px; color: #2563eb; cursor:pointer; margin-bottom:8px; }
+.card h4 { font-size: 22px; color: #1d4ed8; cursor:pointer; margin-bottom:6px; }
 
-.card h2 { font-size: 24px; color: #1e40af; }
-.card h3 { font-size: 22px; color: #2563eb; }
-.card h4 { font-size: 20px; color: #1d4ed8; }
+ul { padding-left: 18px; margin: 0; }
+li { margin-bottom: 8px; font-size: 18px; }
 
-/* Списки дел */
-ul {
-  padding-left: 18px;
-  margin: 0;
-}
-
-li {
-  margin-bottom: 8px;
-  font-size: 18px;
-}
-
-/* Ссылки */
-a {
-  color: #1d4ed8;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-/* Футер */
-.footer {
-  text-align: center;
-  font-size: 14px;
-  color: #6b7280;
-  margin: 40px 0 20px;
-}
-
-/* Адаптивность для мобильных */
 @media (max-width: 600px) {
-  body {
-    font-size: 20px;
-  }
-  header h1 {
-    font-size: 22px;
-  }
-  .card {
-    padding: 16px 18px;
-  }
-  .card h2 { font-size: 22px; }
-  .card h3 { font-size: 20px; }
-  .card h4 { font-size: 18px; }
+  body { font-size: 20px; }
+  header h1 { font-size: 24px; }
+  .card h2 { font-size: 28px; }
+  .card h3 { font-size: 24px; }
+  .card h4 { font-size: 20px; }
 }
+
+.footer { text-align:center; font-size:14px; color:#6b7280; margin:40px 0 20px; }
+
+button { cursor:pointer; }
