@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Архив</title>
+<style>
+body{font-family:sans-serif; font-size:24px; margin:0; padding:16px; background:#f0f4f8;}
+h1{font-size:28px; text-align:center; margin-bottom:16px;}
+.section{margin-bottom:16px;}
+.scrollable{max-height:500px; overflow-y:auto; border:1px solid #ccc; padding:10px; border-radius:10px;}
+.item{margin-bottom:8px;}
+.item strong{display:block; font-size:26px;}
+</style>
+</head>
+<body>
+<h1>Архив</h1>
+<div id="archiveContainer" class="scrollable"></div>
+
+<script>
+fetch('data/archive.json')
+.then(res=>res.json())
+.then(data=>{
+  const container=document.getElementById('archiveContainer');
+  container.innerHTML='';
+  data.shelves.forEach(s=>{
+    const sDiv=document.createElement('div'); sDiv.className='section';
+    const sTitle=document.createElement('strong'); sTitle.textContent=s.name; sDiv.appendChild(sTitle);
+    s.floors.forEach(f=>{
+      const fDiv=document.createElement('div'); fDiv.className='item'; fDiv.style.marginLeft='16px';
+      const fTitle=document.createElement('strong'); fTitle.textContent=f.name; fDiv.appendChild(fTitle);
+      f.boxes.forEach(b=>{
+        const bDiv=document.createElement('div'); bDiv.className='item'; bDiv.style.marginLeft='32px';
+        const bTitle=document.createElement('strong'); bTitle.textContent=b.name; bDiv.appendChild(bTitle);
+        b.cases.forEach(c=>{
+          const cDiv=document.createElement('div'); cDiv.className='item'; cDiv.style.marginLeft='48px';
+          cDiv.textContent=c;
+          bDiv.appendChild(cDiv);
+        });
+        fDiv.appendChild(bDiv);
+      });
+      sDiv.appendChild(fDiv);
+    });
+    container.appendChild(sDiv);
+  });
+});
+</script>
+</body>
+</html>
