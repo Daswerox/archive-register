@@ -1,143 +1,147 @@
-// ===== Чтение параметров URL =====
+// ===== Параметры URL =====
 const urlParams = new URLSearchParams(window.location.search);
-const filterShelf = urlParams.get('shelf'); // номер полки
-const filterFloor = urlParams.get('floor'); // номер этажа
-const filterBox = urlParams.get('box'); // можно добавить отдельно коробку
+const filterShelf = urlParams.get('shelf');
+const filterFloor = urlParams.get('floor');
 
 // ===== Главный контейнер =====
 const main = document.querySelector('main');
 main.innerHTML = '';
 
-// ===== Создаём поле поиска =====
-const searchInput = document.createElement('input');
-searchInput.id = 'search';
-searchInput.placeholder = 'Поиск по архиву...';
-searchInput.style.marginBottom = '20px';
-main.appendChild(searchInput);
+// ===== Поиск =====
+const searchInput = document.getElementById('search');
+const searchBtn = document.getElementById('searchBtn');
 
-// ===== Загружаем JSON =====
-fetch('data/archive.json')
-  .then(response => response.json())
-  .then(data => {
+// ===== Данные архива =====
+let data = null;
 
-    // ===== Функция построения интерфейса =====
-    function displayArchive(items) {
-      main.innerHTML = ''; // очищаем
-      main.appendChild(searchInput); // добавляем поиск
+// ===== Функция фильтрации и поиска с ? и * =====
+function wildcardToRegExp(str) {
+  if (!str) return /.*/;
+  let escaped = str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
+  escaped = escaped.replace(/\\\*/g, '.*');
+  escaped = escaped.replace(/\\\?/g, '.');
+  return new RegExp(escaped, 'i');
+}
 
-      if (!items || items.length === 0) {
-        const msg = document.createElement('p');
-        msg.textContent = 'Ничего не найдено.';
-        main.appendChild(msg);
-        return;
-      }
+function filterData(query, shelfId, floorId) {
+  const regex = wildcardToRegExp(query);
 
-      items.forEach(shelf => {
-        const shelfCard = document.createElement('div');
-        shelfCard.className = 'card';
+  const filteredShelves = data.shelves.map(shelf => {
+    if (shelfId && shelf.id != shelfId) return null;
+    const floors = shelf.floors.map(floor => {
+      if (floorId && floor.id != floorId) return null;
+      const boxes = floor.boxes.map(box => {
+        const cases = box.cases.filter(c => regex.test(c));
+        if (cases.length === 0) return null;
+        return { ...box, cases };
+      }).filter(b => b !== null);
+      if (boxes.length === 0) return null;
+      return { ...floor, boxes };
+    }).filter(f => f !== null);
+    if (floors.length === 0) return null;
+    return { ...shelf, floors };
+  }).filter(s => s !== null);
 
-        const shelfHeader = document.createElement('h2');
-        shelfHeader.textContent = shelf.name + ' (Полка ' + shelf.id + ')';
-        shelfCard.appendChild(shelfHeader);
+  return filteredShelves;
+}
 
-        // показываем этажи сразу только если фильтруем по полке/этаже
-        const floorsContainer = document.createElement('div');
-        floorsContainer.style.marginLeft = '15px';
+// ===== Отображение архива =====
+function displayArchive(shelves) {
+  main.innerHTML = '';
+  main.appendChild(searchInput);
+  main.appendChild(searchBtn);
 
-        shelf.floors.forEach(floor => {
-          const floorCard = document.createElement('div');
-          floorCard.className = 'card';
+  if (!shelves || shelves.length === 0) {
+    const msg = document.createElement('p');
+    msg.textContent = 'Ничего не найдено.';
+    main.appendChild(msg);
+    return;
+  }
 
-          const floorHeader = document.createElement('h3');
-          floorHeader.textContent = floor.name + ' (Этаж ' + floor.id + ')';
-          floorCard.appendChild(floorHeader);
+  shelves.forEach(shelf => {
+    const shelfCard = document.createElement('div');
+    shelfCard.className = 'card';
+    const shelfHeader = document.createElement('h2');
+    shelfHeader.textContent = shelf.name + ' (Полка ' + shelf.id + ')';
+    shelfCard.appendChild(shelfHeader);
 
-          const boxesContainer = document.createElement('div');
-          boxesContainer.style.marginLeft = '15px';
+    const floorsContainer = document.createElement('div');
+    floorsContainer.style.marginLeft = '15px';
+    floorsContainer.style.display = 'block'; // по умолчанию открыто
 
-          floor.boxes.forEach(box => {
-            const boxCard = document.createElement('div');
-            boxCard.className = 'card';
+    shelf.floors.forEach(floor => {
+      const floorCard = document.createElement('div');
+      floorCard.className = 'card';
 
-            const boxHeader = document.createElement('h4');
-            boxHeader.textContent = box.name + ' (Короб ' + box.id + ')';
-            boxCard.appendChild(boxHeader);
+      const floorHeader = document.createElement('h3');
+      floorHeader.textContent = floor.name + ' (Этаж ' + floor.id + ')';
+      floorCard.appendChild(floorHeader);
 
-            const casesList = document.createElement('ul');
+      const boxesContainer = document.createElement('div');
+      boxesContainer.style.marginLeft = '15px';
+      boxesContainer.style.display = 'block'; // открыто
 
-            box.cases.forEach(c => {
-              const li = document.createElement('li');
-              li.textContent = c;
-              casesList.appendChild(li);
-            });
+      floor.boxes.forEach(box => {
+        const boxCard = document.createElement('div');
+        boxCard.className = 'card';
 
-            boxCard.appendChild(casesList);
-            boxesContainer.appendChild(boxCard);
-          });
+        const boxHeader = document.createElement('h4');
+        boxHeader.textContent = box.name + ' (Короб ' + box.id + ')';
+        boxCard.appendChild(boxHeader);
 
-          floorCard.appendChild(boxesContainer);
-          floorsContainer.appendChild(floorCard);
+        const casesList = document.createElement('ul');
+        casesList.style.display = 'block';
+
+        box.cases.forEach(c => {
+          const li = document.createElement('li');
+          li.textContent = c;
+          casesList.appendChild(li);
         });
 
-        shelfCard.appendChild(floorsContainer);
-        main.appendChild(shelfCard);
+        boxHeader.addEventListener('click', () => {
+          casesList.style.display = casesList.style.display === 'none' ? 'block' : 'none';
+        });
+
+        boxCard.appendChild(casesList);
+        boxesContainer.appendChild(boxCard);
       });
-    }
 
-    // ===== Функция фильтрации =====
-    function filterData(query, shelfId, floorId) {
-      // сначала фильтруем по тексту
-      const byText = data.shelves.map(shelf => {
-        const cShelves = {
-          id: shelf.id,
-          name: shelf.name,
-          floors: shelf.floors.map(floor => {
-            const cFloors = {
-              id: floor.id,
-              name: floor.name,
-              boxes: floor.boxes.map(box => {
-                const cBoxes = {
-                  id: box.id,
-                  name: box.name,
-                  cases: box.cases.filter(x => 
-                    x.toLowerCase().includes(query.toLowerCase())
-                  )
-                };
-                return cBoxes;
-              }).filter(b => b.cases.length > 0)
-            };
-            return cFloors;
-          }).filter(f => f.boxes.length > 0)
-        };
-        return cShelves;
-      }).filter(s => s.floors.length > 0);
+      floorHeader.addEventListener('click', () => {
+        boxesContainer.style.display = boxesContainer.style.display === 'none' ? 'block' : 'none';
+      });
 
-      // затем применяем фильтр уровней
-      const byLevels = byText.map(shelf => {
-        if (shelfId && shelf.id != shelfId) return null;
-        return {
-          ...shelf,
-          floors: shelf.floors.map(floor => {
-            if (floorId && floor.id != floorId) return null;
-            return floor;
-          }).filter(f => f !== null)
-        };
-      }).filter(s => s !== null);
-
-      return byLevels;
-    }
-
-    // ===== Начальный показ на основе фильтра URL =====
-    const initial = filterData('', filterShelf, filterFloor);
-    displayArchive(initial);
-
-    // ===== Поиск =====
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.trim();
-      const result = filterData(q, filterShelf, filterFloor);
-      displayArchive(result);
+      floorCard.appendChild(boxesContainer);
+      floorsContainer.appendChild(floorCard);
     });
 
+    shelfHeader.addEventListener('click', () => {
+      floorsContainer.style.display = floorsContainer.style.display === 'none' ? 'block' : 'none';
+    });
+
+    shelfCard.appendChild(floorsContainer);
+    main.appendChild(shelfCard);
+  });
+}
+
+// ===== Кнопки полок =====
+function filterByShelf(shelfId) {
+  const result = filterData(searchInput.value, shelfId, null);
+  displayArchive(result);
+}
+
+// ===== Поиск по кнопке =====
+searchBtn.addEventListener('click', () => {
+  const result = filterData(searchInput.value, filterShelf, filterFloor);
+  displayArchive(result);
+});
+
+// ===== Загрузка JSON =====
+fetch('data/archive.json')
+  .then(res => res.json())
+  .then(json => {
+    data = json;
+    const initial = filterData('', filterShelf, filterFloor);
+    displayArchive(initial);
   })
   .catch(err => {
     main.innerHTML = `<p>Ошибка загрузки архива: ${err}</p>`;
