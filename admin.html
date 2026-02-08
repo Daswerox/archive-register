@@ -86,7 +86,6 @@ const editFloorBtn = document.getElementById('editFloorBtn');
 const deleteFloorBtn = document.getElementById('deleteFloorBtn');
 const editBoxBtn = document.getElementById('editBoxBtn');
 const deleteBoxBtn = document.getElementById('deleteBoxBtn');
-const copyJsonBtn = document.getElementById('copyJsonBtn');
 const openJsonBtn = document.getElementById('openJsonBtn');
 
 // ---------- загрузка JSON ----------
@@ -111,7 +110,7 @@ function updateFloorSelect() {
   const shelf = archive.shelves.find(s => s.name === shelfSelect.value);
   if (!shelf) return;
 
-  if (shelf.floors.length === 0) return; // новых этажей пока нет
+  if (shelf.floors.length === 0) return;
 
   shelf.floors.forEach(f => floorSelect.appendChild(new Option(f.name, f.name)));
   floorSelect.value = shelf.floors[0].name;
@@ -126,7 +125,7 @@ function updateBoxSelect() {
   const floor = shelf?.floors.find(f => f.name === floorSelect.value);
   if (!floor) return;
 
-  if (floor.boxes.length === 0) return; // новых коробок пока нет
+  if (floor.boxes.length === 0) return;
 
   floor.boxes.forEach(b => boxSelect.appendChild(new Option(b.name, b.name)));
   boxSelect.value = floor.boxes[0].name;
@@ -142,7 +141,8 @@ boxSelect.onchange = renderCases;
 addShelfBtn.onclick = () => {
   const name = prompt("Название новой полки:");
   if (!name) return;
-  archive.shelves.push({ id: Date.now(), name, floors: [] });
+  const id = String(archive.shelves.length + 1).padStart(2,'0'); // двузначный ID
+  archive.shelves.push({ id, name, floors: [] });
   updateShelfSelect();
   shelfSelect.value = name;
   updateFloorSelect();
@@ -153,7 +153,8 @@ addFloorBtn.onclick = () => {
   if (!shelf) return;
   const name = prompt("Название нового этажа:");
   if (!name) return;
-  shelf.floors.push({ id: Date.now(), name, boxes: [] });
+  const id = String(shelf.floors.length + 1).padStart(2,'0');
+  shelf.floors.push({ id, name, boxes: [] });
   updateFloorSelect();
   floorSelect.value = name;
   updateBoxSelect();
@@ -165,10 +166,11 @@ addBoxBtn.onclick = () => {
   if (!floor) return;
   const name = prompt("Название новой коробки:");
   if (!name) return;
-  floor.boxes.push({ id: Date.now(), name, cases: [] });
+  const id = String(floor.boxes.length + 1).padStart(2,'0');
+  floor.boxes.push({ id, name, cases: [] });
   updateBoxSelect();
   boxSelect.value = name;
-  renderCases(); // важно!
+  renderCases();
 };
 
 // ---------- дела ----------
@@ -291,7 +293,7 @@ toggleTableBtn.onclick = () => {
   toggleTableBtn.textContent = "Скрыть список";
 };
 
-// ---------- JSON ----------
+// ---------- открыть JSON ----------
 openJsonBtn.onclick = () => {
   const w = window.open("", "_blank");
   w.document.write(`
@@ -299,9 +301,18 @@ openJsonBtn.onclick = () => {
       <head>
         <title>Archive JSON</title>
         <style>
-          html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
-          body { font-family: monospace; font-size: 24px; padding: 20px; background: #f0f4f8; }
-          pre { width: 100%; height: 100%; overflow: auto; font-size: 24px; white-space: pre-wrap; word-break: break-word; }
+          body { 
+            margin: 0; 
+            padding: 20px; 
+            font-family: monospace; 
+            font-size: 36px; /* крупный шрифт */
+            background: #f0f4f8;
+          }
+          pre {
+            width: 100%;
+            white-space: pre-wrap;
+            word-break: break-word;
+          }
         </style>
       </head>
       <body>
@@ -310,9 +321,8 @@ openJsonBtn.onclick = () => {
     </html>
   `);
 };
-
-
 </script>
+
 
 
 </body>
